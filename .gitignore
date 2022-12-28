@@ -1,3 +1,7 @@
+# code
+chromedriver.exe
+column_names.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
