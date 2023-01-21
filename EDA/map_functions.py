@@ -2,12 +2,13 @@ import folium
 import geopy.distance
 import pandas as pd
 
-def add_map_marker(m, lat, lon, name="NA"):
+def add_map_marker(m, lat, lon, name="NA", color="blue", icon="map-marker"):
     folium.Marker(
         location=[lat, lon],
         popup=name,
-        icon=folium.Icon(icon='cloud')
+        icon=folium.Icon(color=color, icon=icon)
     ).add_to(m)
+    # icon list: https://getbootstrap.com/docs/3.3/components/
 
 def add_map_circle(m, lat, lon, radius=800):
     # radius parameter in meters
