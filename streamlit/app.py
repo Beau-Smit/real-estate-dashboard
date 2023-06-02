@@ -1,7 +1,9 @@
 # Can use sqlite3 to mimic a remote database on disk
 # https://docs.python.org/3.8/library/sqlite3.html
 
+import re
 import streamlit as st
+import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point, Polygon
 from snowflake.snowpark import Session
@@ -9,12 +11,11 @@ from streamlit_folium import st_folium
 import folium
 from geopy.geocoders import Nominatim
 import map_functions as maps
+import walk_score
 
-table_name = "REAL_ESTATE.LOCATIONS.POINTS"
+st.set_page_config(layout="wide")
 
 st.title("Property Dashboard")
-st.header("What's nearby?")
-
 
 # https://towardsdatascience.com/how-to-connect-streamlit-to-snowflake-b93256d80a40
 
@@ -30,9 +31,10 @@ session = create_session()
 # Load data table
 @st.cache_data
 def load_data(table_name):
-    table = session.table(table_name)
-
-    return table.to_pandas()
+    # table = session.table(table_name)
+    table = session.sql(f"select * from {table_name}").collect()
+    df = pd.DataFrame(table)
+    return df
 
 @st.cache_data
 def get_property_coordinates(address):
@@ -44,35 +46,21 @@ def get_property_coordinates(address):
     return LAT, LON
 
 @st.cache_data
-def get_points_nearby(LAT, LON):
-    # df_location = session.sql("select * from REAL_ESTATE.LOCATIONS.POINTS limit 50").collect()
+def get_points_nearby(LAT, LON, map_items):
+
     df_location = load_data("REAL_ESTATE.LOCATIONS.POINTS")
-    # df_location.show()
 
     # exclude locations far from property
-    lat_min = LAT - 0.03
-    lat_max = LAT + 0.03
-    lon_min = LON - 0.04
-    lon_max = LON + 0.04
+    lat_min = LAT - 0.02
+    lat_max = LAT + 0.02
+    lon_min = LON - 0.03
+    lon_max = LON + 0.03
 
     # limit the markers on the map
     df_location_map = df_location.loc[
         df_location.SOURCE.isin(
-            [
-                # TODO: controls which points are on map
-                # TODO: need bar names, not business names
-                # "liquor",
-                # "divvy",
-                "murals",
-                # "EV_chargers",
-                "landmarks",
-                "L",
-                "grocery",
-                "park_art",
-                "farmers_market",
-                "hospitals",
-                "metra",
-            ]
+            # TODO: need bar names, not business names
+            map_items
         )
         & (df_location.LATITUDE.between(lat_min, lat_max))
         & (df_location.LONGITUDE.between(lon_min, lon_max)),
@@ -84,14 +72,13 @@ def get_points_nearby(LAT, LON):
 
 @st.cache_data
 def get_area_data(LAT, LON):
-    # df_location = session.sql("select * from REAL_ESTATE.LOCATIONS.POINTS limit 50").collect()
-    df_shape_data = load_data("REAL_ESTATE.LOCATIONS.SHAPES")
 
+    df_shape_data = load_data("REAL_ESTATE.LOCATIONS.SHAPES")
+    
     property_coordinates = gpd.GeoDataFrame(
         {"geometry": [Point(LON, LAT)]}, crs="EPSG:4326"
     )
-
-    # GeoDataFrame.set_geometry
+    
     df_shape_data['GEOMETRY'] = gpd.GeoSeries.from_wkt(df_shape_data['GEOMETRY'])
     geo_df_shape_data = gpd.GeoDataFrame(df_shape_data, geometry='GEOMETRY')
 
@@ -149,21 +136,24 @@ def get_area_data(LAT, LON):
     return zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind
 
 @st.cache_resource
-def build_map(LAT, LON):
+def build_map(LAT, LON, df_location_map):
 
     # TODO: move to config
+    # I think it is only using these icons: https://fontawesome.com/v4/icons/
+    # color choices: ['red', 'blue', 'green', 'purple', 'orange', 'darkred', 'lightred', 'beige', 'darkblue',
+    # 'darkgreen', 'cadetblue', 'darkpurple', 'white', 'pink', 'lightblue', 'lightgreen', 'gray', 'black', 'lightgray']
     source_dict = {
-        "liquor": {"color": "orange", "icon": "martini-glass"},
+        "liquor": {"color": "orange", "icon": "glass"},
         "divvy": {"color": "blue", "icon": "bicycle"},
-        "murals": {"color": "pink", "icon": "palette"},
+        "murals": {"color": "pink", "icon": "paint-brush"},
         "EV_chargers": {"color": "darkgreen", "icon": "bolt"},
-        "landmarks": {"color": "gray", "icon": "landmark"},
-        "L": {"color": "darkblue", "icon": "train-subway"},
-        "grocery": {"color": "green", "icon": "cart-shopping"},
-        "park_art": {"color": "lightred", "icon": "bench-tree"},
-        "farmers_market": {"color": "lightgreen", "icon": "seedling"},
-        "hospitals": {"color": "red", "icon": "plus-sign"},
-        "metra": {"color": "red", "icon": "plus-sign"},
+        "landmarks": {"color": "gray", "icon": "bank"},
+        "L": {"color": "darkblue", "icon": "subway"},
+        "grocery": {"color": "green", "icon": "shopping-cart "},
+        "park_art": {"color": "lightred", "icon": "tree"},
+        "farmers_market": {"color": "lightgreen", "icon": "leaf"},
+        "hospitals": {"color": "red", "icon": "h-square"},
+        "metra": {"color": "purple", "icon": "train"},
     }
 
     # Create a Map instance for Chicago
@@ -198,13 +188,15 @@ def build_map(LAT, LON):
 
     # Change the map style
     # m.add_tile_layer(tiles='Stamen Toner', name='Stamen Toner')
-    # map.save(outfile = "test.html")
+
     m.add_child(feature_group)
 
     return m
 
 if 'address' not in st.session_state:
     st.session_state['address'] = ''
+if 'map_items' not in st.session_state:
+    st.session_state['map_items'] = []
 
 address = st.text_input("Enter Address: ")
 
@@ -212,49 +204,103 @@ if address:
     st.session_state['address'] = address
 
 
-# create three columns
-kpi1, kpi2, kpi3 = st.columns(3)
+if st.session_state['address'] != '':
 
-# fill in those three columns with respective metrics or KPIs
-kpi1.metric(
-    label="Age ⏳",
-    value=round(12),
-    delta=round(14) - 10,
-)
+    with st.sidebar:
+        
+        all_map_items = [
+            'L', 
+            'metra', 
+            'divvy', 
+            'hospitals', 
+            'grocery', 
+            'landmarks', 
+            'murals', 
+            'park_art', 
+            'liquor', 
+            'EV_chargers', 
+            # 'licenses', 
+            # 'current_licenses', 
+            # 'permits', 
+            ]
+        
+        map_items = []
 
-kpi2.metric(
-    label="Married Count 💍",
-    value=int(534),
-    delta=-10 + 64,
-)
-
-kpi3.metric(
-    label="A/C Balance ＄",
-    value=f"$ {round(563,2)} ",
-    delta=-round(245 / 4) * 100,
-)
-
-
-if st.session_state['address'] == '':
-
-    # default map center is downtown Chicago
-    LAT, LON = 41.88357954212235, -87.63152062949634
-
-    # Create a Map instance for Chicago
-    m = folium.Map(location=[LAT, LON], zoom_start=16)
-
-else:
+        for item in all_map_items:
+            if st.checkbox(item):
+                map_items.append(item)
+    
     # geocode the address
     LAT, LON = get_property_coordinates(address)
 
     zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind = get_area_data(LAT, LON)
 
-    st.write(zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind)
-
     # limit the markers on the map
-    df_location_map = get_points_nearby(LAT, LON)
+    # TODO: could we hold the data in memory? then just filter
+    # or is the cache already doing that. need to profile
+    df_location_map = get_points_nearby(LAT, LON, map_items)
 
-    st.text("Circles represent 12 and 25 minute walk approximately.")
-    m = build_map(LAT, LON)
+    # make walk score request
+    # walk, transit, bike = walk_score.get_walk_score_from_address(address, st.secrets["walkscore"]["walk-score-key"])
+    walk, transit, bike = walk_score.get_walk_score_from_coord(LAT, LON, st.secrets["walkscore"]["walk-score-key"])
 
-st_data = st_folium(m, width=725)
+    m = build_map(LAT, LON, df_location_map)
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric(
+        label = "walk score",
+        value = walk,
+    )
+    col2.metric(
+        label = "transit score",
+        value = transit,
+    )
+    col3.metric(
+        label = "bike score",
+        value = bike,
+    )
+
+
+    # create two columns for charts
+    fig_col1, fig_col2 = st.columns(2)
+
+    with fig_col1:
+        st.header("What's nearby?")
+        fig = st_folium(m, width=725)
+        st.text("Circles represent 12 and 25 minute walk approximately.")
+        
+        if st.button('Export Map', help='Save map as html', type='primary'):
+            m.save(outfile = f"{re.sub('[^a-zA-Z0-9]', '_', address)}.html")
+    
+    with fig_col2:
+        st.header("Property Details")
+        
+        col1, col2 = st.columns(2)
+        col1.metric(
+            label="Neighborhood",
+            value=neighborhood,
+        )
+        col2.metric(
+            label="Ward",
+            value=ward,
+        )
+
+        col1, col2 = st.columns(2)
+        col1.metric(
+            label="Zoning",
+            value=zoning,
+        )
+        col2.metric(
+            label="ADU Area",
+            value=adu_ind,
+        )
+        
+        col1, col2 = st.columns(2)
+        col1.metric(
+            label="Mobility Area",
+            value=mobility_ind,
+        )
+        col2.metric(
+            label="Enterprise Zone",
+            value=enterprise_ind,
+        )
