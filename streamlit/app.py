@@ -15,9 +15,11 @@ import walk_score
 
 st.set_page_config(layout="wide")
 
-st.title("Property Dashboard")
+st.text("Dashboard created by Beau Smit")
+st.text("Data provided by Walk Score API, Chicago Data Portal, Nominatim geocoder, and Google Maps")
+st.text("Built with Streamlit, Snowflake, and Folium")
 
-# https://towardsdatascience.com/how-to-connect-streamlit-to-snowflake-b93256d80a40
+st.title("Property Dashboard")
 
 
 # Establish Snowflake session
