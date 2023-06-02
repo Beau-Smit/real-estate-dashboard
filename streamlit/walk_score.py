@@ -1,8 +1,10 @@
 import urllib.parse
 import requests
+import streamlit as st
 
-
+@st.cache_data
 def get_walk_score_from_coord(lat, lon, wskey):
+    print('hereeeeeee')
     api_url = f"https://api.walkscore.com/score?format=json&lat={lat}&lon={lon}&transit=1&bike=1&wsapikey={wskey}"
     response = requests.get(api_url)
     r = response.json()
@@ -11,7 +13,7 @@ def get_walk_score_from_coord(lat, lon, wskey):
     bike_score = r["bike"]["score"]
     return walk_score, transit_score, bike_score
 
-
+@st.cache_data
 def get_walk_score_from_address(address, wskey):
     address_url = urllib.parse.quote(address)
     api_url = f"https://api.walkscore.com/score?format=json&address={address_url}&lat=47.6085&lon=-122.3295&transit=1&bike=1&wsapikey={wskey}"
