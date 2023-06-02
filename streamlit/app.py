@@ -206,8 +206,11 @@ if address:
 
 if st.session_state['address'] != '':
 
+    # https://docs.streamlit.io/library/api-reference/layout/st.sidebar
     with st.sidebar:
         
+        st.header('Include in Map:')
+
         all_map_items = [
             'L', 
             'metra', 
@@ -226,6 +229,7 @@ if st.session_state['address'] != '':
         
         map_items = []
 
+        # https://docs.streamlit.io/library/api-reference/widgets/st.checkbox
         for item in all_map_items:
             if st.checkbox(item):
                 map_items.append(item)
@@ -246,6 +250,8 @@ if st.session_state['address'] != '':
 
     m = build_map(LAT, LON, df_location_map)
 
+    st.divider()
+
     col1, col2, col3 = st.columns(3)
     col1.metric(
         label = "walk score",
@@ -260,6 +266,7 @@ if st.session_state['address'] != '':
         value = bike,
     )
 
+    st.divider()
 
     # create two columns for charts
     fig_col1, fig_col2 = st.columns(2)
@@ -267,14 +274,19 @@ if st.session_state['address'] != '':
     with fig_col1:
         st.header("What's nearby?")
         fig = st_folium(m, width=725)
+
         st.text("Circles represent 12 and 25 minute walk approximately.")
         
-        if st.button('Export Map', help='Save map as html', type='primary'):
-            m.save(outfile = f"{re.sub('[^a-zA-Z0-9]', '_', address)}.html")
+        st.text("Download the map for better performance. Especially if there are many map markers.")
+        btn = st.download_button(
+            label = "Download",
+            data = m._repr_html_(),
+            file_name = f"{re.sub('[^a-zA-Z0-9]', '_', address)}.html",
+            )
     
     with fig_col2:
         st.header("Property Details")
-        
+
         col1, col2 = st.columns(2)
         col1.metric(
             label="Neighborhood",
@@ -294,7 +306,7 @@ if st.session_state['address'] != '':
             label="ADU Area",
             value=adu_ind,
         )
-        
+
         col1, col2 = st.columns(2)
         col1.metric(
             label="Mobility Area",
