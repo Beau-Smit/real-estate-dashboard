@@ -30,13 +30,13 @@ st.success("Connected to Snowflake!")
 
 
 # Load data table
-@st.cache_data
+# @st.cache_data
 def load_data(table_name):
     table = session.table(table_name)
 
     return table.to_pandas()
 
-@st.cache_data
+# @st.cache_data
 def get_property_coordinates(address):
     # get geographic coordinates
     geolocator = Nominatim(user_agent="beau.h.smit@gmail.com")
@@ -45,7 +45,7 @@ def get_property_coordinates(address):
 
     return LAT, LON
 
-@st.cache_data
+# @st.cache_data
 def get_points_nearby(LAT, LON):
     # df_location = session.sql("select * from REAL_ESTATE.LOCATIONS.POINTS limit 50").collect()
     df_location = load_data("REAL_ESTATE.LOCATIONS.POINTS")
@@ -84,7 +84,7 @@ def get_points_nearby(LAT, LON):
     return df_location_map
 
 
-@st.cache_data
+# @st.cache_data
 def get_area_data(LAT, LON):
     # df_location = session.sql("select * from REAL_ESTATE.LOCATIONS.POINTS limit 50").collect()
     df_shape_data = load_data("REAL_ESTATE.LOCATIONS.SHAPES")
@@ -153,7 +153,7 @@ def get_area_data(LAT, LON):
     return zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind
 
 # @st.cache_resource
-@st.cache_resource(experimental_allow_widgets=True)
+# @st.cache_resource(experimental_allow_widgets=True)
 def build_map(LAT, LON):
 
     # TODO: move to config
