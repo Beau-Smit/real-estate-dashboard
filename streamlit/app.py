@@ -226,16 +226,20 @@ if st.session_state['address'] == '':
 else:
     # geocode the address
     LAT, LON = get_property_coordinates(address)
-    st.write('1')
+
     # zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind = get_area_data(LAT, LON)
-    st.write('2')
+
     # st.write(zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind)
 
     # limit the markers on the map
     # df_location_map = get_points_nearby(LAT, LON)
-    st.write('3')
+
     # m = build_map(LAT, LON, df_location_map)
     m = folium.Map(location=[LAT, LON], zoom_start=16)
+    # add marker for the property of interest
+    maps.add_map_marker(
+        m, lat=LAT, lon=LON, name="property", color="black", icon="home"
+    ).add_to(m)
 
     st.text("Circles represent 12 and 25 minute walk approximately.")
 
