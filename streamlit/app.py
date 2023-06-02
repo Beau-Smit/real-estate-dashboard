@@ -20,7 +20,7 @@ st.header("What's nearby?")
 
 
 # Establish Snowflake session
-@st.cache_resource(show_spinner=False)
+@st.cache_resource()
 def create_session():
     # client_session_keep_alive = true
     return Session.builder.configs(st.secrets["snowflake"]).create()
@@ -28,13 +28,13 @@ def create_session():
 session = create_session()
 
 # Load data table
-# @st.cache_data
+@st.cache_data
 def load_data(table_name):
     table = session.table(table_name)
 
     return table.to_pandas()
 
-# @st.cache_data
+@st.cache_data
 def get_property_coordinates(address):
     # get geographic coordinates
     geolocator = Nominatim(user_agent="beau.h.smit@gmail.com")
@@ -43,7 +43,7 @@ def get_property_coordinates(address):
 
     return LAT, LON
 
-# @st.cache_data
+@st.cache_data
 def get_points_nearby(LAT, LON):
     # df_location = session.sql("select * from REAL_ESTATE.LOCATIONS.POINTS limit 50").collect()
     df_location = load_data("REAL_ESTATE.LOCATIONS.POINTS")
@@ -82,12 +82,10 @@ def get_points_nearby(LAT, LON):
     return df_location_map
 
 
-# @st.cache_data
+@st.cache_data
 def get_area_data(LAT, LON):
     # df_location = session.sql("select * from REAL_ESTATE.LOCATIONS.POINTS limit 50").collect()
     df_shape_data = load_data("REAL_ESTATE.LOCATIONS.SHAPES")
-    st.dataframe(df_shape_data)
-    # df_location.show()
 
     property_coordinates = gpd.GeoDataFrame(
         {"geometry": [Point(LON, LAT)]}, crs="EPSG:4326"
@@ -150,8 +148,7 @@ def get_area_data(LAT, LON):
 
     return zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind
 
-# @st.cache_resource
-# @st.cache_resource(experimental_allow_widgets=True)
+@st.cache_resource
 def build_map(LAT, LON):
 
     # TODO: move to config
@@ -213,6 +210,30 @@ address = st.text_input("Enter Address: ")
 
 if address:
     st.session_state['address'] = address
+
+
+# create three columns
+kpi1, kpi2, kpi3 = st.columns(3)
+
+# fill in those three columns with respective metrics or KPIs
+kpi1.metric(
+    label="Age ⏳",
+    value=round(12),
+    delta=round(14) - 10,
+)
+
+kpi2.metric(
+    label="Married Count 💍",
+    value=int(534),
+    delta=-10 + 64,
+)
+
+kpi3.metric(
+    label="A/C Balance ＄",
+    value=f"$ {round(563,2)} ",
+    delta=-round(245 / 4) * 100,
+)
+
 
 if st.session_state['address'] == '':
 
