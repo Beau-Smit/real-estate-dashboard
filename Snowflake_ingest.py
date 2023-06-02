@@ -1,3 +1,7 @@
+"""
+Takes cleaned data and loads it into Snowflake using Snowpark.
+"""
+
 import os
 import toml
 import pandas as pd
@@ -12,6 +16,7 @@ connection_parameters = toml.load(
 )
 
 
+# create a Snowpark session with the secrets toml file
 def create_session():
     return Session.builder.configs(connection_parameters["snowflake"]).create()
 
