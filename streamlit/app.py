@@ -2,8 +2,6 @@
 # https://docs.python.org/3.8/library/sqlite3.html
 
 import streamlit as st
-import snowflake.connector
-import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point, Polygon
 from snowflake.snowpark import Session
