@@ -154,7 +154,7 @@ def get_area_data(LAT, LON):
 
 # @st.cache_resource
 # @st.cache_resource(experimental_allow_widgets=True)
-def build_map(LAT, LON):
+def build_map(LAT, LON, df_location_map):
 
     # TODO: move to config
     source_dict = {
@@ -235,9 +235,9 @@ else:
     st.write(zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind)
 
     # limit the markers on the map
-    # df_location_map = get_points_nearby(LAT, LON)
+    df_location_map = get_points_nearby(LAT, LON)
 
-    # m = build_map(LAT, LON)
+    m = build_map(LAT, LON, df_location_map)
 
     st.text("Circles represent 12 and 25 minute walk approximately.")
 
