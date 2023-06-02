@@ -33,7 +33,7 @@ def load_data(table_name):
     df = table.to_pandas()
     session.close()
 
-    return table.to_pandas()
+    return df
 
 # @st.cache_data
 def get_property_coordinates(address):
@@ -233,9 +233,10 @@ else:
 
     # limit the markers on the map
     # df_location_map = get_points_nearby(LAT, LON)
-    # df_location = session.sql("select * from REAL_ESTATE.LOCATIONS.POINTS limit 50").collect()
-    df_location = load_data("REAL_ESTATE.LOCATIONS.POINTS")
-    # df_location.show()
+    session = create_session()
+    table = session.table("REAL_ESTATE.LOCATIONS.POINTS")
+    df = table.to_pandas()
+    st.dataframe(df)
 
     # m = build_map(LAT, LON, df_location_map)
     m = folium.Map(location=[LAT, LON], zoom_start=16)
