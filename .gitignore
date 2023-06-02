@@ -1,3 +1,5 @@
+**/.streamlit/**
+
 # code
 chromedriver.exe
 column_names.txt
