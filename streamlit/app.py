@@ -34,7 +34,7 @@ st.success("Connected to Snowflake!")
 def load_data(table_name):
     table = session.table(table_name)
 
-    return table.collect()
+    return table.to_pandas()
 
 @st.cache_data
 def get_property_coordinates(address):
@@ -48,7 +48,7 @@ def get_property_coordinates(address):
 @st.cache_data
 def get_points_nearby(LAT, LON):
     # df_location = session.sql("select * from REAL_ESTATE.LOCATIONS.POINTS limit 50").collect()
-    df_location = session.table("REAL_ESTATE.LOCATIONS.POINTS").to_pandas()
+    df_location = load_data("REAL_ESTATE.LOCATIONS.POINTS")
     # df_location.show()
 
     # exclude locations far from property
@@ -87,7 +87,8 @@ def get_points_nearby(LAT, LON):
 @st.cache_data
 def get_area_data(LAT, LON):
     # df_location = session.sql("select * from REAL_ESTATE.LOCATIONS.POINTS limit 50").collect()
-    df_shape_data = session.table("REAL_ESTATE.LOCATIONS.SHAPES").to_pandas()
+    df_shape_data = load_data("REAL_ESTATE.LOCATIONS.SHAPES")
+
     # df_location.show()
 
     property_coordinates = gpd.GeoDataFrame(
