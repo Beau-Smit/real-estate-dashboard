@@ -237,7 +237,7 @@ else:
     # limit the markers on the map
     df_location_map = get_points_nearby(LAT, LON)
 
-    m = build_map(LAT, LON)
+    # m = build_map(LAT, LON)
 
     st.text("Circles represent 12 and 25 minute walk approximately.")
 
