@@ -25,16 +25,14 @@ def create_session():
     # client_session_keep_alive = true
     return Session.builder.configs(st.secrets["snowflake"]).create()
 
+session = create_session()
 
 # Load data table
 # @st.cache_data
 def load_data(table_name):
-    session = create_session()
     table = session.table(table_name)
-    df = table.to_pandas()
-    session.close()
 
-    return df
+    return table.to_pandas()
 
 # @st.cache_data
 def get_property_coordinates(address):
