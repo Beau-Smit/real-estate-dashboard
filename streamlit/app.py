@@ -22,7 +22,7 @@ st.header("What's nearby?")
 # Establish Snowflake session
 @st.cache_resource
 def create_session():
-    return Session.builder.configs(st.secrets.snowflake).create()
+    return Session.builder.configs(st.secrets.connections.snowpark).create()
 
 
 session = create_session()
