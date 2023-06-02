@@ -4,7 +4,7 @@
 import streamlit as st
 import geopandas as gpd
 from shapely.geometry import Point, Polygon
-from snowflake.snowpark.session import Session
+from snowflake.snowpark import Session
 from streamlit_folium import st_folium
 import folium
 from geopy.geocoders import Nominatim
@@ -20,9 +20,10 @@ st.header("What's nearby?")
 
 
 # Establish Snowflake session
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def create_session():
-    return Session.builder.configs(st.secrets.connections.snowpark).create()
+    # client_session_keep_alive = true
+    return Session.builder.configs(st.secrets["snowflake"]).create()
 
 
 # Load data table
