@@ -152,7 +152,7 @@ def get_area_data(LAT, LON):
 
 # @st.cache_resource
 # @st.cache_resource(experimental_allow_widgets=True)
-def build_map(LAT, LON, df_location_map):
+def build_map(LAT, LON):
 
     # TODO: move to config
     source_dict = {
@@ -234,5 +234,6 @@ else:
     df_location_map = get_points_nearby(LAT, LON)
 
     st.text("Circles represent 12 and 25 minute walk approximately.")
+    m = build_map(LAT, LON)
 
 st_data = st_folium(m, width=725)
