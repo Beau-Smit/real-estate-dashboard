@@ -249,6 +249,8 @@ else:
         m, lat=LAT, lon=LON, radius=1600
     )  # 800 meters = 1 miles
 
+    feature_group = folium.FeatureGroup("Locations")
+
     st.text("Circles represent 12 and 25 minute walk approximately.")
 
 st_data = st_folium(m, width=725)
