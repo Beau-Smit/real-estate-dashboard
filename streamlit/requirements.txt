@@ -1,0 +1,3 @@
+# requirements.txt
+snowflake-connector-python
+streamlit-folium==0.11.1
