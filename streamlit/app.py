@@ -228,33 +228,12 @@ else:
     # geocode the address
     LAT, LON = get_property_coordinates(address)
 
-    # zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind = get_area_data(LAT, LON)
+    zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind = get_area_data(LAT, LON)
 
-    # st.write(zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind)
+    st.write(zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind)
 
     # limit the markers on the map
-    # df_location_map = get_points_nearby(LAT, LON)
-    session = create_session()
-    table = session.table("REAL_ESTATE.LOCATIONS.POINTS")
-    df = table.to_pandas()
-    st.dataframe(df)
-
-    # m = build_map(LAT, LON, df_location_map)
-    m = folium.Map(location=[LAT, LON], zoom_start=16)
-    # add marker for the property of interest
-    maps.add_map_marker(
-        m, lat=LAT, lon=LON, name="property", color="black", icon="home"
-    ).add_to(m)
-    
-    # add circles for distance reference around property
-    maps.add_map_circle(
-        m, lat=LAT, lon=LON, radius=800
-    )  # 800 meters = 0.5 miles
-    maps.add_map_circle(
-        m, lat=LAT, lon=LON, radius=1600
-    )  # 800 meters = 1 miles
-
-    feature_group = folium.FeatureGroup("Locations")
+    df_location_map = get_points_nearby(LAT, LON)
 
     st.text("Circles represent 12 and 25 minute walk approximately.")
 
