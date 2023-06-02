@@ -4,7 +4,7 @@
 import streamlit as st
 import geopandas as gpd
 from shapely.geometry import Point, Polygon
-from snowflake.snowpark import Session
+from snowflake.snowpark.session import Session
 from streamlit_folium import st_folium
 import folium
 from geopy.geocoders import Nominatim
