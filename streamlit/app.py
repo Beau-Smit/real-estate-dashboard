@@ -48,7 +48,13 @@ def get_property_coordinates(address):
 @st.cache_data
 def get_points_nearby(LAT, LON, map_items):
 
-    df_location = load_data("REAL_ESTATE.LOCATIONS.POINTS")
+    if len(map_items) == 0:
+        return pd.DataFrame()
+    
+    table_name = 'REAL_ESTATE.LOCATIONS.POINTS'
+    query_filter = str(map_items).strip('][')
+    table = session.sql(f"select * from {table_name} where SOURCE in ({query_filter})").collect()
+    df_location = pd.DataFrame(table)
 
     # exclude locations far from property
     lat_min = LAT - 0.02
@@ -73,8 +79,11 @@ def get_points_nearby(LAT, LON, map_items):
 @st.cache_data
 def get_area_data(LAT, LON):
 
-    df_shape_data = load_data("REAL_ESTATE.LOCATIONS.SHAPES")
-    
+    # TODO: config
+    table_name = 'REAL_ESTATE.LOCATIONS.SHAPES'
+    table = session.sql(f"select * from {table_name}").collect()
+    df_shape_data = pd.DataFrame(table)
+
     property_coordinates = gpd.GeoDataFrame(
         {"geometry": [Point(LON, LAT)]}, crs="EPSG:4326"
     )
@@ -272,6 +281,7 @@ if st.session_state['address'] != '':
     fig_col1, fig_col2 = st.columns(2)
 
     with fig_col1:
+        
         st.header("What's nearby?")
         fig = st_folium(m, width=725)
 
