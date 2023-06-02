@@ -233,6 +233,9 @@ else:
 
     # limit the markers on the map
     # df_location_map = get_points_nearby(LAT, LON)
+    # df_location = session.sql("select * from REAL_ESTATE.LOCATIONS.POINTS limit 50").collect()
+    df_location = load_data("REAL_ESTATE.LOCATIONS.POINTS")
+    # df_location.show()
 
     # m = build_map(LAT, LON, df_location_map)
     m = folium.Map(location=[LAT, LON], zoom_start=16)
