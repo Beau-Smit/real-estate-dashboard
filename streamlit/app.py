@@ -25,13 +25,11 @@ def create_session():
     return Session.builder.configs(st.secrets.connections.snowpark).create()
 
 
-session = create_session()
-st.success("Connected to Snowflake!")
-
 
 # Load data table
 # @st.cache_data
 def load_data(table_name):
+    session = create_session()
     table = session.table(table_name)
 
     return table.to_pandas()
