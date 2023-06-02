@@ -229,14 +229,14 @@ if st.session_state['address'] == '':
 else:
     # geocode the address
     LAT, LON = get_property_coordinates(address)
-    raise('1')
+    st.write('1')
     zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind = get_area_data(LAT, LON)
-    raise('2')
+    st.write('2')
     st.write(zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind)
-    raise('3')
+    st.write('3')
     # limit the markers on the map
     df_location_map = get_points_nearby(LAT, LON)
-    raise('4')
+    st.write('4')
     m = build_map(LAT, LON, df_location_map)
 
     st.text("Circles represent 12 and 25 minute walk approximately.")
