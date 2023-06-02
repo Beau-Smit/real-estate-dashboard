@@ -25,12 +25,13 @@ def create_session():
     return Session.builder.configs(st.secrets.connections.snowpark).create()
 
 
-
 # Load data table
 # @st.cache_data
 def load_data(table_name):
     session = create_session()
     table = session.table(table_name)
+    df = table.to_pandas()
+    session.close()
 
     return table.to_pandas()
 
