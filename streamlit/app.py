@@ -88,7 +88,7 @@ def get_points_nearby(LAT, LON):
 def get_area_data(LAT, LON):
     # df_location = session.sql("select * from REAL_ESTATE.LOCATIONS.POINTS limit 50").collect()
     df_shape_data = load_data("REAL_ESTATE.LOCATIONS.SHAPES")
-
+    st.dataframe(df_shape_data)
     # df_location.show()
 
     property_coordinates = gpd.GeoDataFrame(
@@ -188,8 +188,6 @@ def build_map(LAT, LON, df_location_map):
     )  # 800 meters = 1 miles
 
     feature_group = folium.FeatureGroup("Locations")
-
-    print('here')
 
     for _, row in df_location_map.iterrows():
         feature_group.add_child(
