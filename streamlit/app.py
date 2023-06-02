@@ -235,7 +235,7 @@ else:
     st.write(zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind)
 
     # limit the markers on the map
-    df_location_map = get_points_nearby(LAT, LON)
+    # df_location_map = get_points_nearby(LAT, LON)
 
     # m = build_map(LAT, LON)
 
