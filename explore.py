@@ -1,4 +1,4 @@
-import pandas as pd 
+import pandas as pd
 import os
 import matplotlib.pyplot as plt
 
@@ -16,13 +16,13 @@ df.ISSUE_DATE = pd.to_datetime(df.ISSUE_DATE)
 idx = df.ISSUE_DATE > pd.to_datetime("1/1/2019")
 df = df.loc[idx]
 
-# 'PERMIT - WRECKING/DEMOLITION' 
+# 'PERMIT - WRECKING/DEMOLITION'
 # 'PERMIT - EASY PERMIT PROCESS'
-# 'PERMIT - SIGNS' 
+# 'PERMIT - SIGNS'
 # 'PERMIT - RENOVATION/ALTERATION'
-# 'PERMIT - ELECTRIC WIRING' 
+# 'PERMIT - ELECTRIC WIRING'
 # 'PERMIT - NEW CONSTRUCTION'
-# 'PERMIT - ELEVATOR EQUIPMENT' 
+# 'PERMIT - ELEVATOR EQUIPMENT'
 # 'PERMIT - REINSTATE REVOKED PMT'
 # 'PERMIT - SCAFFOLDING'
 permits_of_interest = ["PERMIT - NEW CONSTRUCTION"]

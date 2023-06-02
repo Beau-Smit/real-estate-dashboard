@@ -1,4 +1,4 @@
-import pandas as pd 
+import pandas as pd
 import os
 
 ROOT = "C:/Users/Beau/Documents/GitHub/RealEstate"
@@ -20,4 +20,6 @@ for col in df.columns:
 # only keep records with both bedrooms and bathrooms data
 df = df.loc[df.Bedrooms.notnull() & df.Bathrooms.notnull()]
 
-df.to_pickle(os.path.join(ROOT, "data", "serialized", "Zillow_multifamily_sold_in_2022.pkl"))
+df.to_pickle(
+    os.path.join(ROOT, "data", "serialized", "Zillow_multifamily_sold_in_2022.pkl")
+)

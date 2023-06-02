@@ -5,10 +5,16 @@ from bokeh.plotting import figure, show
 
 ROOT = "C:/Users/Beau/Documents/GitHub/RealEstate"
 
-df = pd.read_csv(f"{ROOT}/data/raw/Neighborhood_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv")
-df_chi = df.loc[df.City == 'Chicago']
-date_col_names = set([match[0] for match in df.columns.str.findall(r'\d+-\d+-\d+').values if match != []])
-df_long = pd.melt(df_chi, id_vars=['RegionName'], value_vars=date_col_names, var_name='Date')
+df = pd.read_csv(
+    f"{ROOT}/data/raw/Neighborhood_zhvi_uc_sfrcondo_tier_0.33_0.67_sm_sa_month.csv"
+)
+df_chi = df.loc[df.City == "Chicago"]
+date_col_names = set(
+    [match[0] for match in df.columns.str.findall(r"\d+-\d+-\d+").values if match != []]
+)
+df_long = pd.melt(
+    df_chi, id_vars=["RegionName"], value_vars=date_col_names, var_name="Date"
+)
 df_long.Date = pd.to_datetime(df_long.Date)
 
 with open(f"{ROOT}/data/raw/Chicago_neighborhoods.txt", "r") as f:
