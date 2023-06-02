@@ -4,7 +4,6 @@ import streamlit as st
 
 @st.cache_data
 def get_walk_score_from_coord(lat, lon, wskey):
-    print('hereeeeeee')
     api_url = f"https://api.walkscore.com/score?format=json&lat={lat}&lon={lon}&transit=1&bike=1&wsapikey={wskey}"
     response = requests.get(api_url)
     r = response.json()
