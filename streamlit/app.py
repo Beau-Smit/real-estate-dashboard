@@ -233,10 +233,10 @@ else:
 
     # limit the markers on the map
     # df_location_map = get_points_nearby(LAT, LON)
-    # session = create_session()
-    # table = session.table("REAL_ESTATE.LOCATIONS.POINTS")
-    # df = table.to_pandas()
-    # st.dataframe(df)
+    session = create_session()
+    table = session.table("REAL_ESTATE.LOCATIONS.POINTS")
+    df = table.to_pandas()
+    st.dataframe(df)
 
     # m = build_map(LAT, LON, df_location_map)
     m = folium.Map(location=[LAT, LON], zoom_start=16)
