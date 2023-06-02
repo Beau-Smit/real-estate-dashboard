@@ -240,6 +240,14 @@ else:
     maps.add_map_marker(
         m, lat=LAT, lon=LON, name="property", color="black", icon="home"
     ).add_to(m)
+    
+    # add circles for distance reference around property
+    maps.add_map_circle(
+        m, lat=LAT, lon=LON, radius=800
+    )  # 800 meters = 0.5 miles
+    maps.add_map_circle(
+        m, lat=LAT, lon=LON, radius=1600
+    )  # 800 meters = 1 miles
 
     st.text("Circles represent 12 and 25 minute walk approximately.")
 
