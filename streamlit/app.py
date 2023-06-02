@@ -232,9 +232,10 @@ else:
     # st.write(zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind)
 
     # limit the markers on the map
-    df_location_map = get_points_nearby(LAT, LON)
+    # df_location_map = get_points_nearby(LAT, LON)
     st.write('3')
-    m = build_map(LAT, LON, df_location_map)
+    # m = build_map(LAT, LON, df_location_map)
+    m = folium.Map(location=[LAT, LON], zoom_start=16)
 
     st.text("Circles represent 12 and 25 minute walk approximately.")
 
