@@ -1,7 +1,7 @@
 # Can use sqlite3 to mimic a remote database on disk
 # https://docs.python.org/3.8/library/sqlite3.html
 
-import re
+import os, re
 import json
 import streamlit as st
 import pandas as pd
@@ -15,7 +15,8 @@ import map_functions as maps
 import walk_score
 
 # config for map icons
-with open("config.json", "r") as f:
+config_path = os.path.join(os.path.dirname(__file__), '/config.json')
+with open(config_path, "r") as f:
     config = json.loads(f.read())
 
 st.set_page_config(layout="wide")
