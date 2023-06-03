@@ -244,7 +244,7 @@ if st.session_state['address'] != '':
             if st.checkbox(item):
                 selected_map_items.append(item)
         
-        if len(selected_map_items) == 0:
+        if len(all_map_items) == 0:
             st.write("No data for this area...")
 
     # make walk score request
