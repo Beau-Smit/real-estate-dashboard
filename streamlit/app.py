@@ -2,6 +2,7 @@
 # https://docs.python.org/3.8/library/sqlite3.html
 
 import re
+import json
 import streamlit as st
 import pandas as pd
 import geopandas as gpd
@@ -13,13 +14,17 @@ from geopy.geocoders import Nominatim
 import map_functions as maps
 import walk_score
 
+# config for map icons
+with open("config.json", "r") as f:
+    config = json.loads(f.read())
+
 st.set_page_config(layout="wide")
 
 st.text("Dashboard created by Beau Smit")
 st.text("Data provided by Walk Score API, Chicago Data Portal, Nominatim geocoder, and Google Maps")
 st.text("Built with Streamlit, Snowflake, and Folium")
 
-st.title("Property Dashboard")
+st.title("Chicago Property Dashboard")
 
 
 # Establish Snowflake session
@@ -48,14 +53,9 @@ def get_property_coordinates(address):
     return LAT, LON
 
 @st.cache_data
-def get_points_nearby(LAT, LON, map_items):
-
-    if len(map_items) == 0:
-        return pd.DataFrame()
+def get_points_nearby(LAT, LON):
     
-    table_name = 'REAL_ESTATE.LOCATIONS.POINTS'
-    query_filter = str(map_items).strip('][')
-    table = session.sql(f"select * from {table_name} where SOURCE in ({query_filter})").collect()
+    table = session.sql(f"select * from {config['geocoordinates_table']}").collect()
     df_location = pd.DataFrame(table)
 
     # exclude locations far from property
@@ -66,11 +66,7 @@ def get_points_nearby(LAT, LON, map_items):
 
     # limit the markers on the map
     df_location_map = df_location.loc[
-        df_location.SOURCE.isin(
-            # TODO: need bar names, not business names
-            map_items
-        )
-        & (df_location.LATITUDE.between(lat_min, lat_max))
+        (df_location.LATITUDE.between(lat_min, lat_max))
         & (df_location.LONGITUDE.between(lon_min, lon_max)),
         :,
     ]
@@ -81,9 +77,7 @@ def get_points_nearby(LAT, LON, map_items):
 @st.cache_data
 def get_area_data(LAT, LON):
 
-    # TODO: config
-    table_name = 'REAL_ESTATE.LOCATIONS.SHAPES'
-    table = session.sql(f"select * from {table_name}").collect()
+    table = session.sql(f"select * from {config['shapes_table']}").collect()
     df_shape_data = pd.DataFrame(table)
 
     property_coordinates = gpd.GeoDataFrame(
@@ -94,79 +88,86 @@ def get_area_data(LAT, LON):
     geo_df_shape_data = gpd.GeoDataFrame(df_shape_data, geometry='GEOMETRY')
 
     # what is the zoning?
-    zoning = gpd.sjoin(
-        property_coordinates,
-        geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "zoning"]
-    )["LABEL"][0]
+    try:
+        zoning = gpd.sjoin(
+            property_coordinates,
+            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "zoning"]
+        )["LABEL"][0]
+    except KeyError:
+        zoning = "unknown"
 
     # which ward is it in?
-    ward = gpd.sjoin(
-        property_coordinates,
-        geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "ward"]
-    )["LABEL"][0]
+    try:
+        ward = gpd.sjoin(
+            property_coordinates,
+            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "ward"]
+        )["LABEL"][0]
+    except KeyError:
+        ward = "unknown"
 
     # which neighborhood is it in?
-    neighborhood = gpd.sjoin(
-        property_coordinates,
-        geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "neighborhood"]
-    )["LABEL"][0]
+    try:
+        neighborhood = gpd.sjoin(
+            property_coordinates,
+            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "neighborhood"]
+        )["LABEL"][0]
+    except KeyError:
+        neighborhood = "unknown"
 
     # which school district is it in?
-    hs = gpd.sjoin(
-        property_coordinates,
-        geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "high_schools"]
-    )["LABEL"][0]
+    try:
+        hs = gpd.sjoin(
+            property_coordinates,
+            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "high_schools"]
+        )["LABEL"][0]
+    except KeyError:
+        hs = "unknown"
 
     # is this property in ADU area?
-    adu_ind = (
-        gpd.sjoin(
-            property_coordinates,
-            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "ADU"]
-        ).shape[0]
-        > 0
-    )
+    try:
+        adu_ind = (
+            gpd.sjoin(
+                property_coordinates,
+                geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "ADU"]
+            ).shape[0]
+            > 0
+        )
+    except KeyError:
+        adu_ind = "unknown"
 
     # is this property in a mobility zone?
-    mobility_ind = (
-        gpd.sjoin(
-            property_coordinates,
-            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "mobility_areas"]
-        ).shape[0]
-        > 0
-    )
+    try:
+        mobility_ind = (
+            gpd.sjoin(
+                property_coordinates,
+                geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "mobility_areas"]
+            ).shape[0]
+            > 0
+        )
+    except KeyError:
+        mobility_ind = "unknown"
 
     # is this property in an enterprise zone?
-    enterprise_ind = (
-        gpd.sjoin(
-            property_coordinates,
-            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "enterprise_zone"]
-        ).shape[0]
-        > 0
-    )
+    try:
+        enterprise_ind = (
+            gpd.sjoin(
+                property_coordinates,
+                geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "enterprise_zone"]
+            ).shape[0]
+            > 0
+        )
+    except KeyError:
+        enterprise_ind = "unknown"
 
     return zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind
 
 @st.cache_resource
-def build_map(LAT, LON, df_location_map):
+def build_map(LAT, LON, df_location_map, selected_map_items):
 
-    # TODO: move to config
-    # I think it is only using these icons: https://fontawesome.com/v4/icons/
+    # icons: https://fontawesome.com/v4/icons/
     # color choices: ['red', 'blue', 'green', 'purple', 'orange', 'darkred', 'lightred', 'beige', 'darkblue',
     # 'darkgreen', 'cadetblue', 'darkpurple', 'white', 'pink', 'lightblue', 'lightgreen', 'gray', 'black', 'lightgray']
-    source_dict = {
-        "liquor": {"color": "orange", "icon": "glass"},
-        "divvy": {"color": "blue", "icon": "bicycle"},
-        "murals": {"color": "pink", "icon": "paint-brush"},
-        "EV_chargers": {"color": "darkgreen", "icon": "bolt"},
-        "landmarks": {"color": "gray", "icon": "bank"},
-        "L": {"color": "darkblue", "icon": "subway"},
-        "grocery": {"color": "green", "icon": "shopping-cart "},
-        "park_art": {"color": "lightred", "icon": "tree"},
-        "farmers_market": {"color": "lightgreen", "icon": "leaf"},
-        "hospitals": {"color": "red", "icon": "h-square"},
-        "metra": {"color": "purple", "icon": "train"},
-    }
-
+    
     # Create a Map instance for Chicago
     m = folium.Map(location=[LAT, LON], zoom_start=16)
     
@@ -186,16 +187,18 @@ def build_map(LAT, LON, df_location_map):
     feature_group = folium.FeatureGroup("Locations")
 
     for _, row in df_location_map.iterrows():
-        feature_group.add_child(
-            maps.add_map_marker(
-                m,
-                lat=row["LATITUDE"],
-                lon=row["LONGITUDE"],
-                name=row["LABEL"],
-                color=source_dict[row["SOURCE"]]["color"],
-                icon=source_dict[row["SOURCE"]]["icon"],
+        # if record is for one of the checked boxes, create a map marker
+        if row["SOURCE"] in selected_map_items:
+            feature_group.add_child(
+                maps.add_map_marker(
+                    m,
+                    lat=row["LATITUDE"],
+                    lon=row["LONGITUDE"],
+                    name=row["LABEL"],
+                    color=config["icon_mapping"][row["SOURCE"]]["color"],
+                    icon=config["icon_mapping"][row["SOURCE"]]["icon"],
+                )
             )
-        )
 
     # Change the map style
     # m.add_tile_layer(tiles='Stamen Toner', name='Stamen Toner')
@@ -206,60 +209,51 @@ def build_map(LAT, LON, df_location_map):
 
 if 'address' not in st.session_state:
     st.session_state['address'] = ''
-if 'map_items' not in st.session_state:
-    st.session_state['map_items'] = []
 
 address = st.text_input("Enter Address: ")
 
 if address:
     st.session_state['address'] = address
 
-
 if st.session_state['address'] != '':
+    
+    # geocode the address
+    try:
+        LAT, LON = get_property_coordinates(address)
+    except:
+        st.error('Error: could not geocode this address. Please try another address.')
+        st.error('Defaulting to Sears Tower.')
+        LAT, LON = 41.878863944829405, -87.63591030536361
+
+    zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind = get_area_data(LAT, LON)
+
+    # limit the markers on the map
+    df_location_map = get_points_nearby(LAT, LON)
 
     # https://docs.streamlit.io/library/api-reference/layout/st.sidebar
     with st.sidebar:
         
         st.header('Include in Map:')
 
-        all_map_items = [
-            'L', 
-            'metra', 
-            'divvy', 
-            'hospitals', 
-            'grocery', 
-            'landmarks', 
-            'murals', 
-            'park_art', 
-            'liquor', 
-            'EV_chargers', 
-            # 'licenses', 
-            # 'current_licenses', 
-            # 'permits', 
-            ]
-        
-        map_items = []
+        all_map_items = df_location_map.SOURCE.unique().tolist()
+        selected_map_items = []
 
         # https://docs.streamlit.io/library/api-reference/widgets/st.checkbox
         for item in all_map_items:
             if st.checkbox(item):
-                map_items.append(item)
-    
-    # geocode the address
-    LAT, LON = get_property_coordinates(address)
-
-    zoning, ward, neighborhood, hs, adu_ind, mobility_ind, enterprise_ind = get_area_data(LAT, LON)
-
-    # limit the markers on the map
-    # TODO: could we hold the data in memory? then just filter
-    # or is the cache already doing that. need to profile
-    df_location_map = get_points_nearby(LAT, LON, map_items)
+                selected_map_items.append(item)
+        
+        if len(selected_map_items) == 0:
+            st.write("No data for this area...")
 
     # make walk score request
     # walk, transit, bike = walk_score.get_walk_score_from_address(address, st.secrets["walkscore"]["walk-score-key"])
-    walk, transit, bike = walk_score.get_walk_score_from_coord(LAT, LON, st.secrets["walkscore"]["walk-score-key"])
+    try:
+        walk, transit, bike = walk_score.get_walk_score_from_coord(LAT, LON, st.secrets["walkscore"]["walk-score-key"])
+    except:
+        walk, transit, bike = "unknown", "unknown", "unknown"
 
-    m = build_map(LAT, LON, df_location_map)
+    m = build_map(LAT, LON, df_location_map, selected_map_items)
 
     st.divider()
 
