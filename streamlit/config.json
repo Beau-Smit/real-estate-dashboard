@@ -1,0 +1,54 @@
+{
+    "geocoordinates_table": "REAL_ESTATE.LOCATIONS.POINTS",
+    "shapes_table": "REAL_ESTATE.LOCATIONS.SHAPES",
+    "icon_mapping": {
+        "Bars": {
+            "color": "orange", 
+            "icon": "glass"
+            },
+        "Restaurants": {
+            "color": "beige", 
+            "icon": "cutlery"
+        },
+        "Divvy Stations": {
+            "color": "blue", 
+            "icon": "bicycle"
+            },
+        "Murals": {
+            "color": "pink", 
+            "icon": "paint-brush"
+            },
+        "EV Chargers": {
+            "color": "darkgreen", 
+            "icon": "bolt"
+            },
+        "Landmarks": {
+            "color": "gray", 
+            "icon": "bank"
+            },
+        "L Stations": {
+            "color": "darkblue", 
+            "icon": "subway"
+            },
+        "Grocery Stores": {
+            "color": "green", 
+            "icon": "shopping-cart "
+            },
+        "Park Art": {
+            "color": "lightred", 
+            "icon": "tree"
+            },
+        "Farmers Markets": {
+            "color": "lightgreen", 
+            "icon": "leaf"
+            },
+        "Hospitals": {
+            "color": "red", 
+            "icon": "h-square"
+            },
+        "Metra Stations": {
+            "color": "purple", 
+            "icon": "train"
+            }
+    }
+}
