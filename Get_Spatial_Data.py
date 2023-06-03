@@ -1,7 +1,5 @@
 import os
 import pandas as pd
-# import numpy as np
-# import requests
 import json
 from utils import get_SODA_data
 import geopandas as gpd
@@ -13,8 +11,8 @@ pd.set_option("mode.chained_assignment", None)
 with open("extract_source_config.json", "r") as f:
     config = json.loads(f.read())
 
-cleaned_path = os.path.join(config['root_path'], "data", "processed")
-shape_files_path = os.path.join(config['root_path'], "data", "raw", "shape_files")
+cleaned_path = os.path.join(config["root_path"], "data", "processed")
+shape_files_path = os.path.join(config["root_path"], "data", "raw", "shape_files")
 
 
 #### Electric Vehicle Chargers
@@ -158,7 +156,7 @@ df_grocery["longitude"] = df_grocery.location.apply(
 
 
 #### Hospitals
-df_hospitals = gpd.read_file(os.path.join(SHAPE_FILES, "Hospitals.zip"))
+df_hospitals = gpd.read_file(os.path.join(shape_files_path, "Hospitals.zip"))
 df_hospitals["label"] = df_hospitals["LABEL"]
 
 # extract latitude and longitude
@@ -167,7 +165,8 @@ df_hospitals["latitude"] = df_hospitals.geometry.to_crs(4326).geometry.y
 
 
 #### Metra Stations
-df_metra = pd.read_csv(os.path.join(ROOT, "data", "raw", "Metra_Stations.csv"))
+# I had to create this file manually, so there's no "source"
+df_metra = pd.read_csv(os.path.join(config['root_path'], "data", "raw", "Metra_Stations.csv"))
 df_metra["label"] = df_metra["station_name"]
 
 
@@ -310,15 +309,15 @@ sources_point_data = {
     "farmers_market": df_farmers_market,
     "divvy": df_divvy,
     "L": df_L,
-    #     "licenses": df_licenses,
-    #     "current_licenses": df_current_licenses,
+    # "licenses": df_licenses,
+    # "current_licenses": df_current_licenses,
     "restaurants": df_restaurants,
     "bars": df_bars,
     "landmarks": df_landmarks,
     "park_art": df_park_art,
     "murals": df_murals,
     "grocery": df_grocery,
-    #     "permits": df_permits,
+    # "permits": df_permits,
     "hospitals": df_hospitals,
     "metra": df_metra,
 }
@@ -367,5 +366,9 @@ df_shape_data_combined.reset_index(drop=True, inplace=True)
 df_location_combined.columns = [col.upper() for col in df_location_combined.columns]
 df_shape_data_combined.columns = [col.upper() for col in df_shape_data_combined.columns]
 
-df_location_combined.to_pickle(os.path.join(cleaned_path, "whats_nearby_location_data.pkl"))
-df_shape_data_combined.to_pickle(os.path.join(shape_files_path, "whats_nearby_shape_data.pkl"))
+df_location_combined.to_pickle(
+    os.path.join(cleaned_path, "whats_nearby_location_data.pkl")
+)
+df_shape_data_combined.to_pickle(
+    os.path.join(cleaned_path, "whats_nearby_shape_data.pkl")
+)
