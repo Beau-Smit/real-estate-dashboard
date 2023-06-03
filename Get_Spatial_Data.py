@@ -15,31 +15,6 @@ cleaned_path = os.path.join(config["root_path"], "data", "processed")
 shape_files_path = os.path.join(config["root_path"], "data", "raw", "shape_files")
 
 
-#### Electric Vehicle Chargers
-df_EV_chargers = get_SODA_data(
-    api_endpoint="https://data.cityofchicago.org/resource/iq3c-68ew.json",
-    custom_filter="&city=Chicago",
-)
-
-df_EV_chargers["label"] = df_EV_chargers["ev_network"]
-
-
-#### Farmer's Markets
-df_farmers_market = get_SODA_data(
-    api_endpoint="https://data.cityofchicago.org/resource/atzs-u7pv.json"
-)
-
-df_farmers_market["label"] = df_farmers_market["day"]
-
-
-#### Divvy Stations
-df_divvy = get_SODA_data(
-    api_endpoint="https://data.cityofchicago.org/resource/bbyy-e7gq.json"
-)
-
-df_divvy["label"] = df_divvy["station_name"]
-
-
 #### L Stations
 df_L = get_SODA_data(
     api_endpoint="https://data.cityofchicago.org/resource/8pix-ypme.json"
@@ -52,20 +27,46 @@ df_L["latitude"] = df_L.location.apply(lambda x: x["latitude"]).astype(float)
 df_L["longitude"] = df_L.location.apply(lambda x: x["longitude"]).astype(float)
 
 
-#### Business Licenses
-# df_licenses = get_SODA_data(
-#     api_endpoint="https://data.cityofchicago.org/resource/r5kz-chrr.json"
-# )
+#### Metra Stations
+# I had to create this file manually, so there's no "source"
+df_metra = pd.read_csv(os.path.join(config['root_path'], "data", "raw", "Metra_Stations.csv"))
+df_metra["label"] = df_metra["station_name"]
 
-# # remove records with no coordinate data
-# df_licenses = df_licenses.loc[
-#     df_licenses.latitude.notnull() & df_licenses.longitude.notnull()
-# ].reset_index(drop=True)
 
-# df_licenses["label"] = df_licenses["doing_business_as_name"]
+#### Divvy Stations
+df_divvy = get_SODA_data(
+    api_endpoint="https://data.cityofchicago.org/resource/bbyy-e7gq.json"
+)
 
-# df_licenses.latitude = df_licenses.latitude.astype(float)
-# df_licenses.longitude = df_licenses.longitude.astype(float)
+df_divvy["label"] = df_divvy["station_name"]
+
+
+#### Grocery Stores
+df_grocery = get_SODA_data(
+    api_endpoint="https://data.cityofchicago.org/resource/3e26-zek2.json"
+)
+
+# remove records with no coordinate data
+df_grocery = df_grocery.loc[df_grocery.location.notnull()]
+
+df_grocery["label"] = df_grocery["store_name"]
+
+# extract latitude and longitude
+df_grocery["latitude"] = df_grocery.location.apply(
+    lambda x: x["coordinates"][1]
+).astype(float)
+df_grocery["longitude"] = df_grocery.location.apply(
+    lambda x: x["coordinates"][0]
+).astype(float)
+
+
+#### Hospitals
+df_hospitals = gpd.read_file(os.path.join(shape_files_path, "Hospitals.zip"))
+df_hospitals["label"] = df_hospitals["LABEL"]
+
+# extract latitude and longitude
+df_hospitals["longitude"] = df_hospitals.geometry.to_crs(4326).geometry.x
+df_hospitals["latitude"] = df_hospitals.geometry.to_crs(4326).geometry.y
 
 
 #### Current Business Licenses
@@ -77,8 +78,6 @@ df_current_licenses = get_SODA_data(
 df_current_licenses = df_current_licenses.loc[
     df_current_licenses.latitude.notnull() & df_current_licenses.longitude.notnull()
 ]
-
-df_current_licenses["label"] = df_current_licenses["license_description"]
 
 
 #### Restaurants
@@ -136,38 +135,37 @@ df_murals = get_SODA_data(
 df_murals["label"] = df_murals["artwork_title"]
 
 
-#### Grocery Stores
-df_grocery = get_SODA_data(
-    api_endpoint="https://data.cityofchicago.org/resource/3e26-zek2.json"
+#### Electric Vehicle Chargers
+df_EV_chargers = get_SODA_data(
+    api_endpoint="https://data.cityofchicago.org/resource/iq3c-68ew.json",
+    custom_filter="&city=Chicago",
 )
 
-# remove records with no coordinate data
-df_grocery = df_grocery.loc[df_grocery.location.notnull()]
-
-df_grocery["label"] = df_grocery["store_name"]
-
-# extract latitude and longitude
-df_grocery["latitude"] = df_grocery.location.apply(
-    lambda x: x["coordinates"][1]
-).astype(float)
-df_grocery["longitude"] = df_grocery.location.apply(
-    lambda x: x["coordinates"][0]
-).astype(float)
+df_EV_chargers["label"] = df_EV_chargers["ev_network"]
 
 
-#### Hospitals
-df_hospitals = gpd.read_file(os.path.join(shape_files_path, "Hospitals.zip"))
-df_hospitals["label"] = df_hospitals["LABEL"]
+#### Farmer's Markets
+df_farmers_market = get_SODA_data(
+    api_endpoint="https://data.cityofchicago.org/resource/atzs-u7pv.json"
+)
 
-# extract latitude and longitude
-df_hospitals["longitude"] = df_hospitals.geometry.to_crs(4326).geometry.x
-df_hospitals["latitude"] = df_hospitals.geometry.to_crs(4326).geometry.y
+df_farmers_market["label"] = df_farmers_market["day"]
 
 
-#### Metra Stations
-# I had to create this file manually, so there's no "source"
-df_metra = pd.read_csv(os.path.join(config['root_path'], "data", "raw", "Metra_Stations.csv"))
-df_metra["label"] = df_metra["station_name"]
+#### Business Licenses
+# df_licenses = get_SODA_data(
+#     api_endpoint="https://data.cityofchicago.org/resource/r5kz-chrr.json"
+# )
+
+# # remove records with no coordinate data
+# df_licenses = df_licenses.loc[
+#     df_licenses.latitude.notnull() & df_licenses.longitude.notnull()
+# ].reset_index(drop=True)
+
+# df_licenses["label"] = df_licenses["doing_business_as_name"]
+
+# df_licenses.latitude = df_licenses.latitude.astype(float)
+# df_licenses.longitude = df_licenses.longitude.astype(float)
 
 
 #### Building Permits
@@ -181,6 +179,7 @@ df_metra["label"] = df_metra["station_name"]
 # ]
 
 # df_permits["label"] = df_permits["permit_type"]
+
 
 
 #### Mobility Areas
@@ -305,21 +304,21 @@ gdf_hs = gpd.GeoDataFrame(data=df_hs, crs="EPSG:4326", geometry="geometry")
 
 # # Combine all data sources with geo-coordinate data
 sources_point_data = {
-    "EV_chargers": df_EV_chargers,
-    "farmers_market": df_farmers_market,
-    "divvy": df_divvy,
-    "L": df_L,
+    "L Stations": df_L,
+    "Metra Stations": df_metra,
+    "Divvy Stations": df_divvy,
+    "Grocery Stores": df_grocery,
+    "Hospitals": df_hospitals,
+    "Restaurants": df_restaurants,
+    "Bars": df_bars,
+    "Landmarks": df_landmarks,
+    "Park Art": df_park_art,
+    "Murals": df_murals,
+    "EV Chargers": df_EV_chargers,
+    "Farmers Markets": df_farmers_market
     # "licenses": df_licenses,
     # "current_licenses": df_current_licenses,
-    "restaurants": df_restaurants,
-    "bars": df_bars,
-    "landmarks": df_landmarks,
-    "park_art": df_park_art,
-    "murals": df_murals,
-    "grocery": df_grocery,
     # "permits": df_permits,
-    "hospitals": df_hospitals,
-    "metra": df_metra,
 }
 
 df_location_combined = pd.DataFrame(
