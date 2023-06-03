@@ -1,0 +1,57 @@
+{
+    "root_path": "C:/Users/Beau/Documents/GitHub/RealEstate",
+    "mobility_areas": [
+        "KENWOOD",
+        "LINCOLN SQUARE",
+        "HYDE PARK",
+        "ROGERS PARK",
+        "JEFFERSON PARK",
+        "FOREST GLEN",
+        "NORTH PARK",
+        "ALBANY PARK",
+        "PORTAGE PARK",
+        "IRVING PARK",
+        "DUNNING",
+        "MONTCLARE",
+        "BELMONT CRAGIN",
+        "WEST RIDGE",
+        "HERMOSA",
+        "AVONDALE",
+        "LOGAN SQUARE",
+        "WEST TOWN",
+        "NEAR WEST SIDE",
+        "UPTOWN",
+        "NEAR SOUTH SIDE",
+        "ARMOUR SQUARE",
+        "NORWOOD PARK",
+        "NEAR NORTH SIDE",
+        "LOOP",
+        "LAKE VIEW",
+        "NORTH CENTER",
+        "EAST SIDE",
+        "HEGEWISCH",
+        "GARFIELD RIDGE",
+        "ARCHER HEIGHTS",
+        "BRIDGEPORT",
+        "WEST ELSDON",
+        "CLEARING",
+        "WEST LAWN",
+        "LINCOLN PARK",
+        "ASHBURN",
+        "BEVERLY",
+        "MOUNT GREENWOOD",
+        "MORGAN PARK",
+        "OHARE",
+        "EDGEWATER",
+        "EDISON PARK"
+    ],
+    "bar_license_descriptions": [
+        "Consumption on Premises - Incidental Activity", 
+        "Tavern", 
+        "Late Hour"
+    ],
+    "liquor_store_license_descriptions": [
+        "Package Goods"
+    ]
+
+}
