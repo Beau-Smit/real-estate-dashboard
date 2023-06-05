@@ -7,7 +7,6 @@ st.set_page_config(layout="wide")
 
 import re, os
 import json
-from streamlit.components.v1 import html
 from streamlit_folium import st_folium
 import walk_score
 import map_functions
@@ -118,8 +117,8 @@ if st.session_state["address"] != "":
             value=ward,
         )
 
-        widget_html = walk_score.get_walk_score_widget(st.session_state["address"])
-        html(widget_html, height=615)
+        widget_html = walk_score.get_walk_score_widget(st.session_state["address"], config['root_path'])
+        st.components.v1.html(widget_html, height=615)
         # col1, col2 = st.columns(2)
 
         col1.metric(

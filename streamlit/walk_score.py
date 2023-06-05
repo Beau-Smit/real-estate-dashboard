@@ -29,11 +29,11 @@ def get_walk_score_from_address(address, wskey):
 
 
 @st.cache_data
-def get_walk_score_widget(address):
+def get_walk_score_widget(address, ws_widget_key):
     html_str = """
         <script type='text/javascript'>
-        var ws_wsid = 'g1b877420ed61469586d83ab050f564b3';
         """
+    html_str += f"var ws_wsid = {ws_widget_key};"
     html_str += f"var ws_address = '{address}';"
     html_str += """
         var ws_format = 'tall';
