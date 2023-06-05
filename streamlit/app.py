@@ -21,10 +21,6 @@ with open(config_path, "r") as f:
 
 st.set_page_config(layout="wide")
 
-st.text("Dashboard created by Beau Smit")
-st.text("Data provided by Walk Score API, Chicago Data Portal, Nominatim geocoder, and Google Maps")
-st.text("Built with Streamlit, Snowflake, and Folium")
-
 st.title("Chicago Property Dashboard")
 
 
@@ -250,49 +246,59 @@ if st.session_state['address'] != '':
     # make walk score request
     # walk, transit, bike = walk_score.get_walk_score_from_address(address, st.secrets["walkscore"]["walk-score-key"])
     try:
-        walk, transit, bike = walk_score.get_walk_score_from_coord(LAT, LON, st.secrets["walkscore"]["walk-score-key"])
+        walk, desc, transit, bike = walk_score.get_walk_score_from_coord(LAT, LON, st.secrets["walkscore"]["walk-score-key"])
     except:
-        walk, transit, bike = "unknown", "unknown", "unknown"
+        walk, desc, transit, bike = "unknown", "unknown", "unknown"
 
     m = build_map(LAT, LON, df_location_map, selected_map_items)
-
-    st.divider()
-
-    col1, col2, col3 = st.columns(3)
-    col1.metric(
-        label = "walk score",
-        value = walk,
-    )
-    col2.metric(
-        label = "transit score",
-        value = transit,
-    )
-    col3.metric(
-        label = "bike score",
-        value = bike,
-    )
-
-    st.divider()
 
     # create two columns for charts
     fig_col1, fig_col2 = st.columns(2)
 
     with fig_col1:
         
-        st.header("What's nearby?")
         fig = st_folium(m, width=725)
 
-        st.text("Circles represent 12 and 25 minute walk approximately.")
+        fig_col1.markdown("""
+            Circles represent 12 and 25 minute walk approximately. Note that 
+            not all data will be appear on the map, only the points nearby.
+            """)
         
-        st.text("Download the map for better performance. Especially if there are many map markers.")
-        btn = st.download_button(
+        fig_col1.markdown("""
+            Download the map for better performance. Especially if there are many 
+            map markers.""")
+        
+        btn = fig_col1.download_button(
             label = "Download",
             data = m._repr_html_(),
             file_name = f"{re.sub('[^a-zA-Z0-9]', '_', address)}.html",
             )
     
     with fig_col2:
-        st.header("Property Details")
+
+        fig_col2.header("Property Details")
+
+        fig_col2.divider()
+
+        fig_col2.markdown(
+            "[![walk_score](https://cdn.walk.sc/images/api-logo.png)](https://www.redfin.com/how-walk-score-works) " +
+            f"[{walk}](https://www.redfin.com/how-walk-score-works) ({desc}) " + 
+            f"[![question_mark](https://cdn.walk.sc/images/api-more-info.gif)](https://www.redfin.com/how-walk-score-works)"
+            )
+        
+        col1, col2 = st.columns(2)
+
+        col1.metric(
+            label = "Bike Score",
+            value = bike,
+        )
+        col2.metric(
+            label = "transit score",
+            value = transit,
+        )
+
+        col1.divider()
+        col2.divider()
 
         col1, col2 = st.columns(2)
         col1.metric(
@@ -304,7 +310,9 @@ if st.session_state['address'] != '':
             value=ward,
         )
 
-        col1, col2 = st.columns(2)
+        col1.divider()
+        col2.divider()
+
         col1.metric(
             label="Zoning",
             value=zoning,
@@ -314,7 +322,9 @@ if st.session_state['address'] != '':
             value=adu_ind,
         )
 
-        col1, col2 = st.columns(2)
+        col1.divider()
+        col2.divider()
+
         col1.metric(
             label="Mobility Area",
             value=mobility_ind,
@@ -323,3 +333,8 @@ if st.session_state['address'] != '':
             label="Enterprise Zone",
             value=enterprise_ind,
         )
+
+st.divider()
+st.markdown("Data provided by Chicago Data Portal, Walk Score API, Nominatim geocoder, Google Maps")
+st.markdown("Built with Streamlit, Snowflake, Folium")
+st.markdown("Dashboard created by Beau Smit")
