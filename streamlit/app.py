@@ -286,20 +286,9 @@ if st.session_state['address'] != '':
             label="Ward",
             value=ward,
         )
-        
-        my_html = """
-        <script type='text/javascript'>
-        var ws_wsid = 'g1b877420ed61469586d83ab050f564b3';
-        """
-        my_html += f"var ws_address = '{st.session_state['address']}';"
-        my_html += """
-        var ws_format = 'tall';
-        var ws_width = '500';
-        var ws_height = '615';
-        </script><style type='text/css'>#ws-walkscore-tile{position:relative;text-align:left}#ws-walkscore-tile *{float:none;}</style><div id='ws-walkscore-tile'></div><script type='text/javascript' src='http://www.walkscore.com/tile/show-walkscore-tile.php'></script>
-        """
-        html(my_html, height=615)
 
+        widget_html = walk_score.get_walk_score_widget(st.session_state['address'])
+        html(widget_html, height=615)
         # col1, col2 = st.columns(2)
 
         col1.metric(
