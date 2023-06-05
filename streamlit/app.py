@@ -4,6 +4,7 @@
 import os, re
 import json
 import streamlit as st
+from streamlit.components.v1 import html
 import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point, Polygon
@@ -253,11 +254,12 @@ if st.session_state['address'] != '':
     m = build_map(LAT, LON, df_location_map, selected_map_items)
 
     # create two columns for charts
-    fig_col1, fig_col2 = st.columns(2)
+    fig_col1, fig_col2 = st.columns([.6, .4])
 
     with fig_col1:
         
-        fig = st_folium(m, width=725)
+        # TODO: use return_values to improve app performance
+        fig = st_folium(m, width=750)
 
         fig_col1.markdown("""
             Circles represent 12 and 25 minute walk approximately. Note that 
@@ -275,31 +277,6 @@ if st.session_state['address'] != '':
             )
     
     with fig_col2:
-
-        fig_col2.header("Property Details")
-
-        fig_col2.divider()
-
-        fig_col2.markdown(
-            "[![walk_score](https://cdn.walk.sc/images/api-logo.png)](https://www.redfin.com/how-walk-score-works) " +
-            f"[{walk}](https://www.redfin.com/how-walk-score-works) ({desc}) " + 
-            f"[![question_mark](https://cdn.walk.sc/images/api-more-info.gif)](https://www.redfin.com/how-walk-score-works)"
-            )
-        
-        col1, col2 = st.columns(2)
-
-        col1.metric(
-            label = "Bike Score",
-            value = bike,
-        )
-        col2.metric(
-            label = "transit score",
-            value = transit,
-        )
-
-        col1.divider()
-        col2.divider()
-
         col1, col2 = st.columns(2)
         col1.metric(
             label="Neighborhood",
@@ -309,9 +286,21 @@ if st.session_state['address'] != '':
             label="Ward",
             value=ward,
         )
+        
+        my_html = """
+        <script type='text/javascript'>
+        var ws_wsid = 'g1b877420ed61469586d83ab050f564b3';
+        """
+        my_html += f"var ws_address = '{st.session_state['address']}';"
+        my_html += """
+        var ws_format = 'tall';
+        var ws_width = '500';
+        var ws_height = '615';
+        </script><style type='text/css'>#ws-walkscore-tile{position:relative;text-align:left}#ws-walkscore-tile *{float:none;}</style><div id='ws-walkscore-tile'></div><script type='text/javascript' src='http://www.walkscore.com/tile/show-walkscore-tile.php'></script>
+        """
+        html(my_html, height=615)
 
-        col1.divider()
-        col2.divider()
+        # col1, col2 = st.columns(2)
 
         col1.metric(
             label="Zoning",
@@ -322,9 +311,6 @@ if st.session_state['address'] != '':
             value=adu_ind,
         )
 
-        col1.divider()
-        col2.divider()
-
         col1.metric(
             label="Mobility Area",
             value=mobility_ind,
@@ -333,6 +319,7 @@ if st.session_state['address'] != '':
             label="Enterprise Zone",
             value=enterprise_ind,
         )
+
 
 st.divider()
 st.markdown("Data provided by Chicago Data Portal, Walk Score API, Nominatim geocoder, Google Maps")
