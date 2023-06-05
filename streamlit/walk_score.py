@@ -12,9 +12,10 @@ def get_walk_score_from_coord(lat, lon, wskey):
     response = requests.get(api_url)
     r = response.json()
     walk_score = r["walkscore"]
+    walk_score_desc = r["description"]
     transit_score = r["transit"]["score"]
     bike_score = r["bike"]["score"]
-    return walk_score, transit_score, bike_score
+    return walk_score, walk_score_desc, transit_score, bike_score
 
 @st.cache_data
 def get_walk_score_from_address(address, wskey):
@@ -23,6 +24,7 @@ def get_walk_score_from_address(address, wskey):
     response = requests.get(api_url)
     r = response.json()
     walk_score = r["walkscore"]
+    walk_score_desc = r["description"]
     transit_score = r["transit"]["score"]
     bike_score = r["bike"]["score"]
-    return walk_score, transit_score, bike_score
+    return walk_score, walk_score_desc, transit_score, bike_score
