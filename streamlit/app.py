@@ -4,16 +4,21 @@
 import streamlit as st
 st.set_page_config(layout="wide")
 
-import re
+import re, os
+import json
 from streamlit.components.v1 import html
-import pandas as pd
 from streamlit_folium import st_folium
 import walk_score
 import map_functions
 
 
-st.title("Chicago Property Dashboard")
+# config for map icons
+config_path = os.path.join(os.path.dirname(__file__), 'config.json')
+with open(config_path, "r") as f:
+    config = json.loads(f.read())
 
+
+st.title("Chicago Property Dashboard")
 
 if 'address' not in st.session_state:
     st.session_state['address'] = ''
@@ -121,6 +126,7 @@ if st.session_state['address'] != '':
 
 
 st.divider()
+
 st.markdown("Data provided by Chicago Data Portal, Walk Score API, Nominatim geocoder, Google Maps")
-st.markdown("Built with Streamlit, Snowflake, Folium")
-st.markdown("Dashboard created by Beau Smit")
+st.markdown(f"Data last updated {config['last_update']}")
+st.markdown("Dashboard created by Beau Smit using Streamlit, Snowflake, Folium")

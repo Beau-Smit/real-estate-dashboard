@@ -1,6 +1,7 @@
 {
     "geocoordinates_table": "REAL_ESTATE.LOCATIONS.POINTS",
     "shapes_table": "REAL_ESTATE.LOCATIONS.SHAPES",
+    "last_update": "2023-06-03",
     "icon_mapping": {
         "Bars": {
             "color": "orange", 
