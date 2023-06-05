@@ -11,7 +11,7 @@ from snowflake.snowpark import Session
 
 
 # config for map icons
-config_path = os.path.join(os.path.dirname(__file__), 'config.json')
+config_path = os.path.join(os.path.dirname(__file__), "config.json")
 with open(config_path, "r") as f:
     config = json.loads(f.read())
 
@@ -22,7 +22,9 @@ def create_session():
     # client_session_keep_alive = true
     return Session.builder.configs(st.secrets["snowflake"]).create()
 
+
 session = create_session()
+
 
 # Load data table
 @st.cache_data
@@ -31,6 +33,7 @@ def load_data(table_name):
     table = session.sql(f"select * from {table_name}").collect()
     df = pd.DataFrame(table)
     return df
+
 
 @st.cache_data
 def get_property_coordinates(address):
@@ -94,7 +97,6 @@ def count_points_within_range(
 
 @st.cache_data
 def get_points_nearby(LAT, LON):
-    
     table = session.sql(f"select * from {config['geocoordinates_table']}").collect()
     df_location = pd.DataFrame(table)
 
@@ -116,22 +118,21 @@ def get_points_nearby(LAT, LON):
 
 @st.cache_data
 def get_area_data(LAT, LON):
-
     table = session.sql(f"select * from {config['shapes_table']}").collect()
     df_shape_data = pd.DataFrame(table)
 
     property_coordinates = gpd.GeoDataFrame(
         {"geometry": [Point(LON, LAT)]}, crs="EPSG:4326"
     )
-    
-    df_shape_data['GEOMETRY'] = gpd.GeoSeries.from_wkt(df_shape_data['GEOMETRY'])
-    geo_df_shape_data = gpd.GeoDataFrame(df_shape_data, geometry='GEOMETRY')
+
+    df_shape_data["GEOMETRY"] = gpd.GeoSeries.from_wkt(df_shape_data["GEOMETRY"])
+    geo_df_shape_data = gpd.GeoDataFrame(df_shape_data, geometry="GEOMETRY")
 
     # what is the zoning?
     try:
         zoning = gpd.sjoin(
             property_coordinates,
-            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "zoning"]
+            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "zoning"],
         )["LABEL"][0]
     except KeyError:
         zoning = "unknown"
@@ -140,7 +141,7 @@ def get_area_data(LAT, LON):
     try:
         ward = gpd.sjoin(
             property_coordinates,
-            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "ward"]
+            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "ward"],
         )["LABEL"][0]
     except KeyError:
         ward = "unknown"
@@ -149,7 +150,7 @@ def get_area_data(LAT, LON):
     try:
         neighborhood = gpd.sjoin(
             property_coordinates,
-            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "neighborhood"]
+            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "neighborhood"],
         )["LABEL"][0]
     except KeyError:
         neighborhood = "unknown"
@@ -158,7 +159,7 @@ def get_area_data(LAT, LON):
     try:
         hs = gpd.sjoin(
             property_coordinates,
-            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "high_schools"]
+            geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "high_schools"],
         )["LABEL"][0]
     except KeyError:
         hs = "unknown"
@@ -168,7 +169,7 @@ def get_area_data(LAT, LON):
         adu_ind = (
             gpd.sjoin(
                 property_coordinates,
-                geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "ADU"]
+                geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "ADU"],
             ).shape[0]
             > 0
         )
@@ -180,7 +181,7 @@ def get_area_data(LAT, LON):
         mobility_ind = (
             gpd.sjoin(
                 property_coordinates,
-                geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "mobility_areas"]
+                geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "mobility_areas"],
             ).shape[0]
             > 0
         )
@@ -192,7 +193,7 @@ def get_area_data(LAT, LON):
         enterprise_ind = (
             gpd.sjoin(
                 property_coordinates,
-                geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "enterprise_zone"]
+                geo_df_shape_data.loc[geo_df_shape_data.SOURCE == "enterprise_zone"],
             ).shape[0]
             > 0
         )
@@ -204,26 +205,21 @@ def get_area_data(LAT, LON):
 
 @st.cache_resource
 def build_map(LAT, LON, df_location_map, selected_map_items):
-
     # icons: https://fontawesome.com/v4/icons/
     # color choices: ['red', 'blue', 'green', 'purple', 'orange', 'darkred', 'lightred', 'beige', 'darkblue',
     # 'darkgreen', 'cadetblue', 'darkpurple', 'white', 'pink', 'lightblue', 'lightgreen', 'gray', 'black', 'lightgray']
-    
+
     # Create a Map instance for Chicago
     m = folium.Map(location=[LAT, LON], zoom_start=16)
-    
+
     # add marker for the property of interest
     add_map_marker(
         lat=LAT, lon=LON, name="property", color="black", icon="home"
     ).add_to(m)
 
     # add circles for distance reference around property
-    add_map_circle(
-        lat=LAT, lon=LON, radius=800
-    ).add_to(m)  # 800 meters = 0.5 miles
-    add_map_circle(
-        lat=LAT, lon=LON, radius=1600
-    ) .add_to(m) # 800 meters = 1 miles
+    add_map_circle(lat=LAT, lon=LON, radius=800).add_to(m)  # 800 meters = 0.5 miles
+    add_map_circle(lat=LAT, lon=LON, radius=1600).add_to(m)  # 800 meters = 1 miles
 
     feature_group = folium.FeatureGroup("Locations")
 

@@ -14,6 +14,7 @@ def get_walk_score_from_coord(lat, lon, wskey):
     bike_score = r["bike"]["score"]
     return walk_score, walk_score_desc, transit_score, bike_score
 
+
 @st.cache_data
 def get_walk_score_from_address(address, wskey):
     address_url = urllib.parse.quote(address)
@@ -25,6 +26,7 @@ def get_walk_score_from_address(address, wskey):
     transit_score = r["transit"]["score"]
     bike_score = r["bike"]["score"]
     return walk_score, walk_score_desc, transit_score, bike_score
+
 
 @st.cache_data
 def get_walk_score_widget(address):
