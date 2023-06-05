@@ -30,15 +30,14 @@ def get_walk_score_from_address(address, wskey):
 
 @st.cache_data
 def get_walk_score_widget(address, ws_widget_key):
-    html_str = """
-        <script type='text/javascript'>
-        """
-    html_str += f"var ws_wsid = {ws_widget_key};"
-    html_str += f"var ws_address = '{address}';"
-    html_str += """
-        var ws_format = 'tall';
+    html_str = (
+        "<script type='text/javascript'>" + 
+        f"var ws_wsid = '{ws_widget_key}';\
+        var ws_address = '{address}';" + 
+        """var ws_format = 'tall';
         var ws_width = '500';
         var ws_height = '615';
         </script><style type='text/css'>#ws-walkscore-tile{position:relative;text-align:left}#ws-walkscore-tile *{float:none;}</style><div id='ws-walkscore-tile'></div><script type='text/javascript' src='http://www.walkscore.com/tile/show-walkscore-tile.php'></script>
         """
+        )
     return html_str
