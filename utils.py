@@ -1,14 +1,16 @@
 import os
+import json
+import yaml
 import pandas as pd
 import requests
-import yaml
 
-ROOT = "C:/Users/Beau/Documents/GitHub/RealEstate"
-SHAPE_FILES = os.path.join(ROOT, "data", "raw", "shape_files")
-CLEANED = os.path.join(ROOT, "data", "processed")
+root_path = "C:/Users/Beau/Documents/GitHub/RealEstate"
+
+with open("extract_source_config.json", "r") as f:
+    config = json.loads(f.read())
 
 # get application token
-with open(os.path.join(ROOT, "credentials.yml"), mode="r") as file:
+with open(os.path.join(root_path, "credentials.yml"), mode="r") as file:
     apptoken = yaml.safe_load(file)["SODA-token"]
 
 
