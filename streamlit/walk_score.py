@@ -3,9 +3,6 @@ import requests
 import streamlit as st
 
 
-# TODO: format the credits for Walk Score:
-# https://www.walkscore.com/professional/branding-requirements.php
-
 @st.cache_data
 def get_walk_score_from_coord(lat, lon, wskey):
     api_url = f"https://api.walkscore.com/score?format=json&lat={lat}&lon={lon}&transit=1&bike=1&wsapikey={wskey}"
