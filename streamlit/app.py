@@ -23,6 +23,10 @@ st.title("Chicago Property Dashboard")
 
 if "address" not in st.session_state:
     st.session_state["address"] = ""
+if "lat" not in st.session_state:
+    st.session_state["lat"] = 41.87882943531799
+if "lon" not in st.session_state:
+    st.session_state["lon"] = -87.63591312449257
 
 address = st.text_input("Enter Address: ")
 
@@ -32,12 +36,12 @@ if address:
 if st.session_state["address"] != "":
     # geocode the address
     try:
-        LAT, LON = map_functions.get_property_coordinates(address)
+        st.session_state["lat"], st.session_state["lon"] = map_functions.get_property_coordinates(address)
     except:
         st.error("Error: could not geocode this address. Please try another address.")
         st.error("Defaulting to Sears Tower.")
-        LAT, LON = 41.878863944829405, -87.63591030536361
-
+        st.session_state["lat"], st.session_state["lon"] = 41.87882943531799, -87.63591312449257
+    
     (
         zoning,
         ward,
@@ -46,10 +50,10 @@ if st.session_state["address"] != "":
         adu_ind,
         mobility_ind,
         enterprise_ind,
-    ) = map_functions.get_area_data(LAT, LON)
+    ) = map_functions.get_area_data(st.session_state["lat"], st.session_state["lon"])
 
     # limit the markers on the map
-    df_location_map = map_functions.get_points_nearby(LAT, LON)
+    df_location_map = map_functions.get_points_nearby(st.session_state["lat"], st.session_state["lon"])
 
     # https://docs.streamlit.io/library/api-reference/layout/st.sidebar
     with st.sidebar:
@@ -70,12 +74,12 @@ if st.session_state["address"] != "":
     # walk, transit, bike = walk_score.get_walk_score_from_address(address, st.secrets["walkscore"]["walk-score-key"])
     try:
         walk, desc, transit, bike = walk_score.get_walk_score_from_coord(
-            LAT, LON, st.secrets["walkscore"]["walk-score-key"]
+            st.session_state["lat"], st.session_state["lon"], st.secrets["walkscore"]["walk-score-key"]
         )
     except:
         walk, desc, transit, bike = "unknown", "unknown", "unknown", "unknown"
 
-    m = map_functions.build_map(LAT, LON, df_location_map, selected_map_items)
+    m = map_functions.build_map(st.session_state["lat"], st.session_state["lon"], df_location_map, selected_map_items)
 
     # create two columns for charts
     fig_col1, fig_col2 = st.columns([0.6, 0.4])
