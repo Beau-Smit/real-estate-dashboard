@@ -4,6 +4,7 @@
 import streamlit as st
 
 st.set_page_config(layout="wide")
+st.set_theme('dark')
 
 import re, os
 import json
