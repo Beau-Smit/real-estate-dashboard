@@ -117,19 +117,8 @@ if st.session_state["address"] != "":
             value=ward,
         )
 
-        # widget_html = walk_score.get_walk_score_widget(st.session_state["address"], st.secrets["walkscore"]['ws-widget-key'])
-        # st.write(widget_html)
-        html_str = (
-        "<script type='text/javascript'>" + 
-        f"var ws_wsid = '{st.secrets['walkscore']['ws-widget-key']}';\
-        var ws_address = '{address}';" + 
-        """var ws_format = 'tall';
-        var ws_width = '500';
-        var ws_height = '615';
-        </script><style type='text/css'>#ws-walkscore-tile{position:relative;text-align:left}#ws-walkscore-tile *{float:none;}</style><div id='ws-walkscore-tile'></div><script type='text/javascript' src='https://www.walkscore.com/tile/show-walkscore-tile.php'></script>
-        """
-        )
-        st.components.v1.html(html_str, height=615)
+        widget_html = walk_score.get_walk_score_widget(st.session_state["address"], st.secrets["walkscore"]['ws-widget-key'])
+        st.components.v1.html(widget_html, height=615)
         # col1, col2 = st.columns(2)
 
         col1.metric(
