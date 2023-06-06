@@ -119,9 +119,11 @@ if st.session_state["address"] != "":
 
         widget_html = walk_score.get_walk_score_widget(st.session_state["address"], st.secrets["walkscore"]['ws-widget-key'])
         st.write(widget_html)
+        st.write(widget_html)
         st.components.v1.html(widget_html, height=615)
         st.components.v1.html("<p>hellllooooo</p>", height=615)
         # col1, col2 = st.columns(2)
+        st.write("<p>hellllooooo</p>")
 
         col1.metric(
             label="Zoning",
