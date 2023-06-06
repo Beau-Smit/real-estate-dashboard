@@ -117,7 +117,7 @@ if st.session_state["address"] != "":
             value=ward,
         )
 
-        widget_html = walk_score.get_walk_score_widget(st.session_state["address"], os.environ['WS_WIDGET_KEY'])
+        widget_html = walk_score.get_walk_score_widget(st.session_state["address"], st.secrets["walkscore"]['ws-widget-key'])
         st.components.v1.html(widget_html, height=615)
         # col1, col2 = st.columns(2)
 
